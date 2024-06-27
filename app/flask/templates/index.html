@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bucket Owners</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Lista de Buckets</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID do Bucket</th>
+                    <th>Nome do Bucket</th>
+                    <th>Nome do Proprietário</th>
+                    <th>Email do Proprietário</th>
+                    <th>Data de Criação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bucket in buckets %}
+                <tr>
+                    <td>{{ bucket.bucket_id }}</td>
+                    <td>{{ bucket.bucket_name }}</td>
+                    <td>{{ bucket.owner_name }}</td>
+                    <td>{{ bucket.owner_email }}</td>
+                    <td>{{ bucket.created_at }}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal{{ bucket.bucket_id }}">Editar</button>
+                        <form action="{{ url_for('system.delete_bucket', bucket_id=bucket.bucket_id) }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+
+    </script>
+
+</body>
+</html>
