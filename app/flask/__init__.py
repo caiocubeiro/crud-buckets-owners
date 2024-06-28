@@ -11,7 +11,9 @@ def init_app():
 
     with app.app_context():
         from app.flask.routes.system import page
-
         app.register_blueprint(page)
+        
+        from app.dashboard import init_dashboard
+        app = init_dashboard(app)
 
     return app
