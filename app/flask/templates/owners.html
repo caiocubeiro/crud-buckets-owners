@@ -7,7 +7,6 @@
                 <th>Nome do Proprietário</th>
                 <th>Email do Proprietário</th>
                 <th>Departamento</th>
-                <th>Gerente</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -17,7 +16,6 @@
                 <td>{{ owner.owner_name }}</td>
                 <td>{{ owner.owner_email }}</td>
                 <td>{{ owner.owner_department }}</td>
-                <td>{{ owner.owner_manager }}</td>
                 <td>
                     <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editOwnerModal{{ owner.uuid }}">Editar</button>
                     <form action="{{ url_for('system.delete_owner', owner_uuid=owner.uuid) }}" method="post" style="display:inline;">
@@ -54,6 +52,10 @@
                     <div class="form-group">
                         <label for="ownerEmail">Email do Proprietário</label>
                         <input type="email" class="form-control" id="ownerEmail" name="owner_email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerRole">Cargo do Proprietário</label>
+                        <input type="text" class="form-control" id="ownerRole" name="owner_role" required>
                     </div>
                     <div class="form-group">
                         <label for="ownerDepartment">Departamento</label>
@@ -95,6 +97,10 @@
                         <input type="email" class="form-control" id="ownerEmail{{ owner.uuid }}" name="owner_email" value="{{ owner.owner_email }}" required>
                     </div>
                     <div class="form-group">
+                        <label for="ownerRole{{ owner.uuid }}">Cargo do Proprietário</label>
+                        <input type="text" class="form-control" id="ownerRole{{ owner.uuid }}" name="owner_role" value="{{ owner.owner_role }}" required>
+                    </div>
+                    <div class="form-group">
                         <label for="ownerDepartment{{ owner.uuid }}">Departamento</label>
                         <input type="text" class="form-control" id="ownerDepartment{{ owner.uuid }}" name="owner_department" value="{{ owner.owner_department }}" required>
                     </div>
@@ -119,10 +125,10 @@
     <!-- Gerar CSV -->
     document.getElementById('generateOwnerCsv').addEventListener('click', function() {
         let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "Nome,Email,Departamento,Gerente,Data de Criacao\n";
+        csvContent += "Nome,Email,Cargo,Departamento,Gerente,Data de Criacao\n";
 
         {% for owner in owners %}
-        csvContent += `"{{ owner.owner_name }}","{{ owner.owner_email }}","{{ owner.owner_department }}","{{ owner.owner_manager }}"\n`;
+        csvContent += `"{{ owner.owner_name }}","{{ owner.owner_email }}","{{ owner.owner_role }}","{{ owner.owner_department }}","{{ owner.owner_manager }}"\n`;
         {% endfor %}
 
         var encodedUri = encodeURI(csvContent);
