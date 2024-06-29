@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bucket Owners</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -14,145 +12,33 @@
         <a class="navbar-brand" href="/dashboard">Dashboard</a>
     </nav>
 
-    <div class="container mt-5">
-        <h1 class="mb-4">Lista de Buckets</h1>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Nome do Bucket</th>
-                    <th>Nome do Proprietário</th>
-                    <th>Email do Proprietário</th>
-                    <th>Data de Criação</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for bucket in buckets %}
-                <tr>
-                    <td>{{ bucket.bucket_name }}</td>
-                    <td>{{ bucket.owner_name }}</td>
-                    <td>{{ bucket.owner_email }}</td>
-                    <td>{{ bucket.created_at }}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal{{ bucket.uuid }}">Editar</button>
-                        <form action="{{ url_for('system.delete_bucket', bucket_uuid=bucket.uuid) }}" method="post" style="display:inline;">
-                            <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    {% block buckets_content %}
+        {% include "buckets.html" %}
+    {% endblock %}
 
-    <div class="container mt-4">
-        <button class="btn btn-secondary" id="generateCsv">Gerar CSV</button>
-        <button class="btn btn-success" data-toggle="modal" data-target="#addModal">Adicionar Bucket</button>
-    </div>
+    {% block owners_content %}
+        {% include "owners.html" %}
+    {% endblock %}
 
-    <script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-        <!-- Gerar CSV -->
-        document.getElementById('generateCsv').addEventListener('click', function() {
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Nome do Bucket,Nome do Proprietário,Email do Proprietário,Data de Criação\n";
+    {% block buckets_scripts %}{% endblock %}
+    {% block owners_scripts %}{% endblock %}
 
-            {% for bucket in buckets %}
-            csvContent += `"{{ bucket.bucket_name }}","{{ bucket.owner_name }}","{{ bucket.owner_email }}","{{ bucket.created_at }}"\n`;
+    <!-- Alerts Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <script>
+                    Swal.fire({
+                        icon: '{{ category }}',
+                        text: '{{ message }}'
+                    });
+                </script>
             {% endfor %}
-    
-            var encodedUri = encodeURI(csvContent);
-            var link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "buckets.csv");
-            document.body.appendChild(link);
-    
-            link.click();
-        });
-
-    </script>
-        <!-- Add Modal -->
-        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addModalLabel">Adicionar Bucket</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="{{ url_for('system.add_bucket') }}" method="post">
-                            <div class="form-group">
-                                <label for="bucketName">Nome do Bucket</label>
-                                <input type="text" class="form-control" id="bucketName" name="bucket_name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="ownerName">Nome do Proprietário</label>
-                                <input type="text" class="form-control" id="ownerName" name="owner_name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="ownerEmail">Email do Proprietário</label>
-                                <input type="email" class="form-control" id="ownerEmail" name="owner_email" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Adicionar</button>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    
-        <!-- Edit Modals -->
-        {% for bucket in buckets %}
-        <div class="modal fade" id="editModal{{ bucket.uuid }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel{{ bucket.uuid }}" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editModalLabel{{ bucket.uuid }}">Editar Bucket</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="{{ url_for('system.edit_bucket', bucket_uuid=bucket.uuid) }}" method="post">
-                            <div class="form-group">
-                                <label for="bucketName{{ bucket.uuid }}">Nome do Bucket</label>
-                                <input type="text" class="form-control" id="bucketName{{ bucket.uuid }}" name="bucket_name" value="{{ bucket.bucket_name }}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="ownerName{{ bucket.uuid }}">Nome do Proprietário</label>
-                                <input type="text" class="form-control" id="ownerName{{ bucket.uuid }}" name="owner_name" value="{{ bucket.owner_name }}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="ownerEmail{{ bucket.uuid }}">Email do Proprietário</label>
-                                <input type="email" class="form-control" id="ownerEmail{{ bucket.uuid }}" name="owner_email" value="{{ bucket.owner_email }}" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Salvar</button>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-
-        <!-- Alerts Flash -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <script>
-                        Swal.fire({
-                            icon: '{{ category }}',
-                            text: '{{ message }}'
-                        });
-                    </script>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+        {% endif %}
+    {% endwith %}
 </body>
 </html>

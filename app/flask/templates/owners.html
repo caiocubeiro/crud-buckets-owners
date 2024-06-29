@@ -1,0 +1,137 @@
+{% block owners_content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Lista de Proprietários</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nome do Proprietário</th>
+                <th>Email do Proprietário</th>
+                <th>Departamento</th>
+                <th>Gerente</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for owner in owners %}
+            <tr>
+                <td>{{ owner.owner_name }}</td>
+                <td>{{ owner.owner_email }}</td>
+                <td>{{ owner.owner_department }}</td>
+                <td>{{ owner.owner_manager }}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editOwnerModal{{ owner.uuid }}">Editar</button>
+                    <form action="{{ url_for('system.delete_owner', owner_uuid=owner.uuid) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="container mt-4">
+    <button class="btn btn-secondary" id="generateOwnerCsv">Gerar CSV</button>
+    <button class="btn btn-success" data-toggle="modal" data-target="#addOwnerModal">Adicionar Proprietário</button>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addOwnerModal" tabindex="-1" role="dialog" aria-labelledby="addOwnerModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addOwnerModalLabel">Adicionar Proprietário</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('system.add_owner') }}" method="post">
+                    <div class="form-group">
+                        <label for="ownerName">Nome do Proprietário</label>
+                        <input type="text" class="form-control" id="ownerName" name="owner_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerEmail">Email do Proprietário</label>
+                        <input type="email" class="form-control" id="ownerEmail" name="owner_email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerDepartment">Departamento</label>
+                        <input type="text" class="form-control" id="ownerDepartment" name="owner_department" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerManager">Gerente</label>
+                        <input type="text" class="form-control" id="ownerManager" name="owner_manager" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modals -->
+{% for owner in owners %}
+<div class="modal fade" id="editOwnerModal{{ owner.uuid }}" tabindex="-1" role="dialog" aria-labelledby="editOwnerModalLabel{{ owner.uuid }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editOwnerModalLabel{{ owner.uuid }}">Editar Proprietário</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('system.edit_owner', owner_uuid=owner.uuid) }}" method="post">
+                    <div class="form-group">
+                        <label for="ownerName{{ owner.uuid }}">Nome do Proprietário</label>
+                        <input type="text" class="form-control" id="ownerName{{ owner.uuid }}" name="owner_name" value="{{ owner.owner_name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerEmail{{ owner.uuid }}">Email do Proprietário</label>
+                        <input type="email" class="form-control" id="ownerEmail{{ owner.uuid }}" name="owner_email" value="{{ owner.owner_email }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerDepartment{{ owner.uuid }}">Departamento</label>
+                        <input type="text" class="form-control" id="ownerDepartment{{ owner.uuid }}" name="owner_department" value="{{ owner.owner_department }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerManager{{ owner.uuid }}">Gerente</label>
+                        <input type="text" class="form-control" id="ownerManager{{ owner.uuid }}" name="owner_manager" value="{{ owner.owner_manager }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block owners_scripts %}
+<script>
+    <!-- Gerar CSV -->
+    document.getElementById('generateOwnerCsv').addEventListener('click', function() {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Nome,Email,Departamento,Gerente,Data de Criacao\n";
+
+        {% for owner in owners %}
+        csvContent += `"{{ owner.owner_name }}","{{ owner.owner_email }}","{{ owner.owner_department }}","{{ owner.owner_manager }}"\n`;
+        {% endfor %}
+
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "owners.csv");
+        document.body.appendChild(link);
+
+        link.click();
+    });
+</script>
+{% endblock %}

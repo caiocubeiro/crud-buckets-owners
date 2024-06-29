@@ -1,0 +1,177 @@
+{% block buckets_content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Lista de Buckets</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nome do Bucket</th>
+                <th>Nome do Proprietário</th>
+                <th>Email do Proprietário</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bucket in buckets %}
+            <tr>
+                <td>{{ bucket.bucket_name }}</td>
+                <td>{{ bucket.owner_name }}</td>
+                <td>{{ bucket.owner_email }}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal{{ bucket.uuid }}">Editar</button>
+                    <form action="{{ url_for('system.delete_bucket', bucket_uuid=bucket.uuid) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="container mt-4">
+    <button class="btn btn-secondary" id="generateCsv">Gerar CSV</button>
+    <button class="btn btn-success" data-toggle="modal" data-target="#addModal">Adicionar Bucket</button>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Adicionar Bucket</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('system.add_bucket') }}" method="post">
+                    <div class="form-group">
+                        <label for="bucketName">Nome do Bucket</label>
+                        <input type="text" class="form-control" id="bucketName" name="bucket_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerName">Nome do Proprietário</label>
+                        <select class="form-control" id="ownerName" name="owner_name" required>
+                            <option value="" disabled selected>Selecione o proprietário</option>
+                            {% for owner in owners %}
+                                <option value="{{ owner.owner_name }}" data-email="{{ owner.owner_email }}" data-uuid="{{ owner.uuid }}">{{ owner.owner_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerEmail">Email do Proprietário</label>
+                        <input type="text" class="form-control" id="ownerEmail" name="owner_email" readonly>
+                    </div>
+                    <input type="hidden" id="ownerUuid" name="owner_uuid">
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modals -->
+{% for bucket in buckets %}
+<div class="modal fade" id="editModal{{ bucket.uuid }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel{{ bucket.uuid }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel{{ bucket.uuid }}">Editar Bucket</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('system.edit_bucket', bucket_uuid=bucket.uuid) }}" method="post">
+                    <div class="form-group">
+                        <label for="bucketName{{ bucket.uuid }}">Nome do Bucket</label>
+                        <input type="text" class="form-control" id="bucketName{{ bucket.uuid }}" name="bucket_name" value="{{ bucket.bucket_name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerName{{ bucket.uuid }}">Nome do Proprietário</label>
+                        <select class="form-control owner-name-select" id="ownerName{{ bucket.uuid }}" name="owner_name" required>
+                            <option value="" disabled>Selecione o proprietário</option>
+                            {% for owner in owners %}
+                                <option value="{{ owner.owner_name }}" data-email="{{ owner.owner_email }}" data-uuid="{{ owner.uuid }}" {% if owner.owner_name == bucket.owner_name %}selected{% endif %}>{{ owner.owner_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerEmail{{ bucket.uuid }}">Email do Proprietário</label>
+                        <input type="text" class="form-control owner-email-input" id="ownerEmail{{ bucket.uuid }}" name="owner_email" value="{{ bucket.owner_email }}" readonly>
+                    </div>
+                    <input type="hidden" class="owner-uuid-input" id="ownerUuid{{ bucket.uuid }}" name="owner_uuid" value="{{ bucket.owner_uuid }}">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+
+{% block buckets_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Função para atualizar o email baseado no nome do proprietário
+        function updateOwnerEmail(ownerSelect, emailInput, uuidInput) {
+            const selectedOption = ownerSelect.options[ownerSelect.selectedIndex];
+            if (selectedOption) {
+                emailInput.value = selectedOption.getAttribute('data-email');
+                uuidInput.value = selectedOption.getAttribute('data-uuid');
+            } else {
+                emailInput.value = '';
+                uuidInput.value = '';
+            }
+        }
+
+        // Adicionar modal
+        const ownerNameAdd = document.getElementById('ownerName');
+        const ownerEmailAdd = document.getElementById('ownerEmail');
+        const ownerUuidAdd = document.getElementById('ownerUuid');
+
+        ownerNameAdd.addEventListener('change', function() {
+            updateOwnerEmail(ownerNameAdd, ownerEmailAdd, ownerUuidAdd);
+        });
+
+        // Editar modais
+        const ownerNameEdits = document.querySelectorAll('.owner-name-select');
+        const ownerEmailInputs = document.querySelectorAll('.owner-email-input');
+        const ownerUuidInputs = document.querySelectorAll('.owner-uuid-input');
+
+        ownerNameEdits.forEach(function(ownerNameEdit, index) {
+            const ownerEmailEdit = ownerEmailInputs[index];
+            const ownerUuidEdit = ownerUuidInputs[index];
+
+            ownerNameEdit.addEventListener('change', function() {
+                updateOwnerEmail(ownerNameEdit, ownerEmailEdit, ownerUuidEdit);
+            });
+        });
+
+        // Gerar CSV
+        document.getElementById('generateCsv').addEventListener('click', function() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nome do Bucket,Nome do Proprietario,Email do Proprietario,Data de Criacao\n";
+
+            {% for bucket in buckets %}
+            csvContent += `"{{ bucket.bucket_name }}","{{ bucket.owner_name }}","{{ bucket.owner_email }}"\n`;
+            {% endfor %}
+
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "buckets.csv");
+            document.body.appendChild(link);
+
+            link.click();
+        });
+    });
+</script>
+{% endblock %}
