@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, request, flash, url_for, render_template
+from flask import Blueprint, redirect, request, flash, url_for, render_template, jsonify
 from uuid import uuid4
 from datetime import datetime
 import pandas as pd
@@ -89,6 +89,31 @@ def delete_bucket(bucket_uuid):
         print_hora(f"Falha ao deletar bucket, erro: {e}")
     return redirect(url_for('system.index'))
 
+@page.route('/search_bucket', methods=['POST'])
+def search_bucket():
+    search_value = request.form['search_value']
+    query = """
+    SELECT b.*, 
+           o.owner_name, 
+           o.owner_email, 
+           o.owner_role, 
+           o.owner_department, 
+           o.owner_manager 
+    FROM buckets AS b
+    INNER JOIN owners AS o ON b.owner_uuid = o.uuid
+    WHERE b.uuid = %s OR b.bucket_name = %s;
+    """
+    try:
+        result = execute_query(query, (search_value, search_value))
+        if result:
+            bucket = result[0]
+            return jsonify(bucket)
+        else:
+            return jsonify({"error": "Não localizado"}), 404
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Não localizado"}), 404
+
 
 #Owners Routes
 @page.route('/add_owner', methods=['POST'])
@@ -151,23 +176,17 @@ def edit_owner(owner_uuid):
 
 @page.route("/delete_owner/<owner_uuid>", methods=["POST"])
 def delete_owner(owner_uuid):
-    if request.method == 'POST':
-        print("Método POST recebido")
-        try:
-            query = "DELETE FROM owners WHERE uuid = %(uuid)s"
-            execute_query(query, {"uuid": owner_uuid}, commit=True)
-            flash(f'Deletado com sucesso!', 'success')
-            print_hora(f"Owner {owner_uuid} deletado")
-        except Exception as e:
-            flash('Falha ao deletar', 'error')
-            print_hora(f"Falha ao deletar owner, erro: {e}")
+    try:
+        query_buckets = "DELETE FROM buckets WHERE owner_uuid = %(uuid)s"
+        execute_query(query_buckets, {"uuid": owner_uuid}, commit=True)
+        query_owner = "DELETE FROM owners WHERE uuid = %(uuid)s"
+        execute_query(query_owner, {"uuid": owner_uuid}, commit=True)
+        flash(f'Deletado com sucesso!', 'success')
+        print_hora(f"Owner {owner_uuid} deletado")
+    except Exception as e:
+        flash('Falha ao deletar', 'error')
+        print_hora(f"Falha ao deletar owner, erro: {e}")
     return redirect(url_for('system.index'))
-
-@page.route("/test_delete_owner/<owner_uuid>", methods=['GET', 'POST'])
-def test_delete_owner(owner_uuid):
-    print(owner_uuid)
-    print("Método POST recebido")
-    return "Teste de rota bem-sucedido"
 
 
 

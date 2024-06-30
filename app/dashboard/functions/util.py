@@ -84,7 +84,7 @@ def montaBarChartSize(df):
     return fig
 
 def montaPieChartSize(df):
-    grouped_df = df.groupby('owner_department')['size_gb'].nunique().reset_index()
+    grouped_df = df.groupby('owner_department')['size_gb'].sum().reset_index()
     grouped_df.columns = ['department', 'gbs']
     
     fig = go.Figure(data=[
