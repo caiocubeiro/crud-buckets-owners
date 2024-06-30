@@ -1,7 +1,8 @@
 from dash import Dash
 import dash_bootstrap_components as dbc
 
-external_stylesheets = ['base.css', dbc.themes.BOOTSTRAP]
+external_stylesheets = ["base.css", dbc.themes.BOOTSTRAP]
+
 
 def init_dashboard(app):
     dash_module = Dash(
@@ -9,6 +10,6 @@ def init_dashboard(app):
         use_pages=True,
         pages_folder="../dashboard/pages",
         assets_folder="../dashboard/pages",
-        external_stylesheets=external_stylesheets
+        external_stylesheets=external_stylesheets,
     )
     return dash_module.server
