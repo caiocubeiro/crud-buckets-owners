@@ -2,6 +2,17 @@
 
 Este projeto é um exemplo de CRUD desenvolvido com Flask e Plotly Dash
 
+## Bibliotecas utilizadas:
+
+- **Flask**
+- **dotenv**
+- **mysql.connector**
+- **uuid**
+- **Dash**
+- **Dash Bootstrap Components**
+- **Plotly**
+- **Jinja**
+
 Para rodar este projeto localmente, siga os passos abaixo:
 ```bash
     git clone https://github.com/caiocubeiro/crud-buckets-owners
@@ -52,14 +63,11 @@ Inicie a aplicação:
     python wsgi.py     
 ```
 
-## Bibliotecas
+Para novos commits sempre aplicar formatação e verificação bandit
+```bash
+    black .
+    bandit . 
+```
 
-- **Flask**
-- **dotenv**
-- **mysql.connector**
-- **uuid**
-- **Dash**
-- **Dash Bootstrap Components**
-- **Plotly**
-- **Jinja**
+
 
