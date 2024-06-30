@@ -6,7 +6,12 @@ navbar = dbc.Navbar(
             dbc.Row(
                 [
                     dbc.Col(
-                        dbc.NavbarBrand("Voltar a Lista", href="/", external_link=True, className="btn"),
+                        dbc.NavbarBrand(
+                            "Voltar a Lista",
+                            href="/",
+                            external_link=True,
+                            className="btn",
+                        ),
                     ),
                 ],
                 align="center",
