@@ -6,7 +6,7 @@ CREATE TABLE buckets (
     size_gb DECIMAL(10,2) NOT NULL,
     owner_uuid CHAR(36) NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE owners (

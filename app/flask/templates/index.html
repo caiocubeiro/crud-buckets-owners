@@ -10,19 +10,63 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand btn btn-primary" href="/dashboard">Ir ao Dashboard</a>
+        <button class="btn btn-secondary ml-auto" data-toggle="modal" data-target="#searchModal">Buscar Bucket</button>
     </nav>
 
     {% block buckets_content %}
-        {% include "buckets.html" %}
+    {% include "buckets.html" %}
     {% endblock %}
 
     {% block owners_content %}
         {% include "owners.html" %}
     {% endblock %}
 
+    <!-- Modal -->
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="searchModalLabel">Localizar Bucket</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="searchForm" action="{{ url_for('system.search_bucket') }}" method="post">
+                        <div class="form-group">
+                            <label for="searchValue">UUID ou Nome do Bucket:</label>
+                            <input type="text" class="form-control" id="searchValue" name="search_value" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resultModalLabel">Detalhes do Bucket</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="resultModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     {% block buckets_scripts %}{% endblock %}
     {% block owners_scripts %}{% endblock %}
@@ -40,5 +84,49 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const searchValue = document.getElementById('searchValue').value;
+            const form = event.target;
+    
+            fetch(form.action, {
+                method: form.method,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(new FormData(form))
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    Swal.fire({
+                        icon: 'error',
+                        text: data.error
+                    });
+                } else {
+                    let bucketDetails = `
+                        <p><strong>UUID:</strong> ${data.uuid}</p>
+                        <p><strong>Nome do Bucket:</strong> ${data.bucket_name}</p>
+                        <p><strong>Tamanho (GB):</strong> ${data.size_gb}</p>
+                        <p><strong>Nome do Proprietário:</strong> ${data.owner_name}</p>
+                        <p><strong>Email do Proprietário:</strong> ${data.owner_email}</p>
+                        <p><strong>Função do Proprietário:</strong> ${data.owner_role}</p>
+                        <p><strong>Departamento do Proprietário:</strong> ${data.owner_department}</p>
+                        <p><strong>Gerente do Proprietário:</strong> ${data.owner_manager}</p>
+                        <p><strong>Criado em:</strong> ${new Date(data.created_at).toLocaleString()}</p>
+                        <p><strong>Atualizado em:</strong> ${new Date(data.updated_at).toLocaleString()}</p>
+                    `;
+                    document.getElementById('resultModalBody').innerHTML = bucketDetails;
+                    $('#resultModal').modal('show');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+    
 </body>
 </html>

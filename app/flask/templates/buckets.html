@@ -168,10 +168,10 @@
         // Gerar CSV
         document.getElementById('generateCsv').addEventListener('click', function() {
             let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Nome do Bucket,Nome do Proprietario,Email do Proprietario,Data de Criacao\n";
+            csvContent += "Nome do Bucket,Tamanho do Bucket (GB),Nome do Proprietario,Email do Proprietario\n";
 
             {% for bucket in buckets %}
-            csvContent += `"{{ bucket.bucket_name }}","{{ bucket.owner_name }}","{{ bucket.owner_email }}"\n`;
+            csvContent += `"{{ bucket.bucket_name }}","{{ bucket.size_gb }}","{{ bucket.owner_name }}","{{ bucket.owner_email }}"\n`;
             {% endfor %}
 
             var encodedUri = encodeURI(csvContent);

@@ -11,5 +11,4 @@ def init_dashboard(app):
         assets_folder="../dashboard/pages",
         external_stylesheets=external_stylesheets
     )
-    dash_module.enable_dev_tools(debug=None)
     return dash_module.server
