@@ -42,6 +42,11 @@ Configure o banco mariadb:
     exit
 ```
 
+Executar as queries do arquivo: 
+```bash
+app\flask\db\bucket_owners.sql
+```
+
 Inicie a aplicação:
 ```bash
     python wsgi.py     
