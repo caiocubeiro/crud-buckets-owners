@@ -97,7 +97,7 @@ def delete_bucket(bucket_uuid):
 
 @page.route("/search_bucket", methods=["POST"])
 def search_bucket():
-    search_value = request.form["search_value"]
+    search_value = request.form["search_value"].strip()
     query = """
     SELECT b.*, 
            o.owner_name, 
