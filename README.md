@@ -12,6 +12,7 @@ Este projeto é um exemplo de CRUD desenvolvido com Flask e Plotly Dash
 - **Dash Bootstrap Components**
 - **Plotly**
 - **Jinja**
+- **Pandas**
 
 Para rodar este projeto localmente, siga os passos abaixo:
 ```bash
